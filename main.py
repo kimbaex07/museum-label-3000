@@ -8,6 +8,7 @@ Pure Python standard library only.
 
 import os
 import sys
+import unicodedata
 
 LINE = (
     "Parking Meter, c. 2025: citizens fed this iron box coins to rent "
@@ -23,6 +24,14 @@ def main():
         return 1
     if "\n" in line or "\r" in line:
         print("error: line must be a single line", file=sys.stderr)
+        return 1
+    if any(unicodedata.category(ch) == "Cc" for ch in line):
+        print("error: line contains control characters", file=sys.stderr)
+        return 1
+    try:
+        line.encode("utf-8")
+    except UnicodeEncodeError:
+        print("error: line is not valid UTF-8", file=sys.stderr)
         return 1
     if len(line) > 200:
         print(f"error: line is {len(line)} chars, over the 200-char limit",
